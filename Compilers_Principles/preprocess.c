@@ -8,7 +8,7 @@
 #include<string.h>
 #include<stdlib.h>
 
-#define MAX 1000  // 输入文件字符最大长度
+#define MAX 10000  // 输入文件字符最大长度
 
 int current = -1;  // 当前读到的字符的index
 int str_index = 0;  // 输入程序字符长度
@@ -24,6 +24,7 @@ char get_char();  // 获取下一个字符
 void go_back();  // 回退一个字符
 void save_char();  // 将当前字符保存至预处理之后的字符数组中
 void save_spec_char(char);  // 保存一个特定的字符
+int previous_is_space();  // 查看已处理字符的最后一个是否是空格
 
 int main(int argc, char *argv[]){
     fp = fopen(argv[1], "r");
@@ -58,11 +59,11 @@ int main(int argc, char *argv[]){
             case '\n':  // 换行符
             case '\r':  // 回车符
             case ' ':
-                save_spec_char(' ');  // 均替换为单个的空格字符
-                cur_str = get_char();
-                while(cur_str == ' ' || cur_str == '\t' || cur_str == '\r' || cur_str == '\n'){
+                if(!previous_is_space())  // 防止因为中间注释等，出现多个space
+                    save_spec_char(' ');  // 均替换为单个的空格字符
+                do{
                     cur_str = get_char();
-                }
+                }while(cur_str == ' ' || cur_str == '\t' || cur_str == '\r' || cur_str == '\n');
                 go_back();
                 break;
             default:
@@ -96,4 +97,18 @@ void save_char(){
 
 void save_spec_char(char tmp){
     aftstr[aftindex++] = tmp;
+}
+
+int previous_is_space(){
+    if(aftindex > 0){
+        if(aftstr[aftindex - 1] == ' '){
+            return 1;
+        }
+        else{
+            return 0;
+        }
+    }
+    else{
+        return 0;
+    }
 }

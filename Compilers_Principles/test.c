@@ -1,6 +1,15 @@
-main()  // 这只是个测试的注释
+int main()  // 这只是个测试的注释
 {
 int
+// sdfasdfasdfasdfasdf
+
+// test
+
+// what ????
+/* this is a test?
+!!! //
+
+sss*/
 a,b;
 a = 10;
    b = a + 21;  // that's good.
