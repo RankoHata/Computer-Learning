@@ -1,7 +1,8 @@
 # vscode
 .vscode
 
-# exe
 *.exe
+
 *.out
+
 *.txt
