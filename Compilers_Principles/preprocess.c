@@ -3,6 +3,7 @@
     把原始程序中相邻的空格、制表符、回车等空白符合并成一个空格，便于后续处理
 2. 消除注释
     消除原始程序中的注释内容
+3. 无法对 #include #define 等不以 ';' 分割的语句进行判别
 */
 #include<stdio.h>
 #include<string.h>
@@ -55,7 +56,8 @@ int main(int argc, char *argv[]){
                         ;
                 }
                 break;
-            case '\t':  // 制表符  合并空白行
+            /* 合并空白符 */
+            case '\t':  // 制表符  // Note: 对于 #define # include 并不适用，因其并不采用 ; 分隔
             case '\n':  // 换行符
             case '\r':  // 回车符
             case ' ':

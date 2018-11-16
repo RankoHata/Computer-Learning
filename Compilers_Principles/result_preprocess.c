@@ -1,0 +1,1 @@
+int main() { int a,b; a = 10; b = a + 21; for(int i = 0; i < 10; i++) b++; return 0; } 

@@ -13,6 +13,7 @@ sss*/
 a,b;
 a = 10;
    b = a + 21;  // that's good.
+            for(int i = 0; i < 10; i++)   b++;
 return 0;
 }
 
