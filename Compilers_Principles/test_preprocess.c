@@ -11,9 +11,10 @@ int
 
 sss*/
 a,b;
-a = 10;
+a = 10143;
    b = a + 21;  // that's good.
-            for(int i = 0; i < 10; i++)   b++;
+            for(int i = 0; i < 1021; i++)   b++;
+
 return 0;
 }
 
