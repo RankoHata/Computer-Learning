@@ -2,7 +2,7 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
-#include<stdbool.h>
+#include<stdbool.h>  // 使用bool
 
 #define MAXSIZE 10000  // 输入字符的最大长度
 #define WORDSIZE 256  // 关键字或单个变量最大长度
@@ -26,6 +26,7 @@ int token_index = 0;
 
 FILE *fp;  // 程序源文件
 
+// Keyword List
 char keyword[KEYWORDNUM][KEYWORDMAXSIZE] = { "main",
     "auto", "short", "int", "long", "float", "double", "char", "struct",
     "union", "enum", "typedef", "const", "unsigned", "signed", "extern", "register",
@@ -40,10 +41,10 @@ void go_back();  // 回退一个字符
 bool is_letter();  // 是否为字母
 bool is_digit();  // 是否为数字
 int reserve();  // 由token查找保留字表，返回保留编码，若无，返回0
-void set_blank();  // 将token置为全\0
+void set_blank();  // 将token置为全'\0'
 
 int main(int argc, char *argv[]){
-    fp = fopen(argv[1], "r");
+    fp = fopen(argv[1], "r");  // 打开文件
     char c;
     while((c = getc(fp)) != EOF){  // 从源文件中读入字符
         str[str_index++] = c;
@@ -52,9 +53,9 @@ int main(int argc, char *argv[]){
     int type_code;
     while(1){
         set_blank();
-        get_char();
-        getnbc();
-        if(is_letter() || CHAR == '_'){
+        get_char();  // 首先读入1个字符
+        getnbc();  // 避免读入的是空字符
+        if(is_letter() || CHAR == '_'){  // 字母开头
             do{
                 concat();
                 get_char();
@@ -62,10 +63,10 @@ int main(int argc, char *argv[]){
             go_back();
             type_code = reserve();
             if(type_code == 0){
-                printf("<%d, %s>\n", $ID, token);
+                printf("<%d, %s>\n", $ID, token);  // 判定为标识符
             }
             else{
-                printf("<%d, %s>\n", type_code, token);
+                printf("<%d, %s>\n", type_code, token);  // 关键字
             }
         }
         else if(is_digit()){
@@ -74,10 +75,10 @@ int main(int argc, char *argv[]){
                 get_char();
             }while(is_digit());
             go_back();
-            printf("<%d, %s>\n", $INT, token);
+            printf("<%d, %s>\n", $INT, token);  // 数字
         }
         else{
-            char before = CHAR;
+            char before = CHAR;  // 因为拥有二元操作符，使用before记录前一个字符，并未使用token实现存储
             switch(CHAR){
                 case '+':
                 case '-':
@@ -88,7 +89,7 @@ int main(int argc, char *argv[]){
                 case '>':
                 case '!':
                     get_char();
-                    switch(CHAR){
+                    switch(CHAR){  // 操作符
                         case '=':
                             printf("<%d, %c%c>\n", $operator, before, CHAR);
                             break;
@@ -108,7 +109,7 @@ int main(int argc, char *argv[]){
                 case '{':
                 case '}':
                 case ':':
-                    printf("<%d, %c>\n", $delimiter, CHAR);
+                    printf("<%d, %c>\n", $delimiter, CHAR);  // 分隔符
                     break;
                 default:
                     break;
