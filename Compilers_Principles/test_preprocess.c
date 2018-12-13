@@ -10,10 +10,10 @@ int
 !!! //
 
 sss*/
-a,b;
+a, _x_b;
 a = 10143;
-   b = a + 21;  // that's good.
-            for(int i = 0; i < 1021; i++)   b++;
+   _x_b = a + 21;  // that's good.
+            for(int i = 0; i < 1021; i++)   _x_b++;
 
 return 0;
 }

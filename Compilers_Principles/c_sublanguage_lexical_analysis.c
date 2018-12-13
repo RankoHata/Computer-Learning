@@ -22,7 +22,7 @@ int str_index = 0;  // 输入成旭的字符长度
 char str[MAXSIZE];  // 存储源文件的字符
 
 char token[WORDSIZE] = {'\0'};  // 构成单词符号的字符串
-int token_index = 0;
+int token_index = 0;  // token当前的位置
 
 FILE *fp;  // 程序源文件
 
@@ -55,11 +55,11 @@ int main(int argc, char *argv[]){
         set_blank();
         get_char();  // 首先读入1个字符
         getnbc();  // 避免读入的是空字符
-        if(is_letter() || CHAR == '_'){  // 字母开头
+        if(is_letter() || CHAR == '_'){  // 字母开头或者下划线开头
             do{
                 concat();
                 get_char();
-            }while(is_letter() | is_digit());
+            }while(is_letter() | is_digit() | CHAR == '_');
             go_back();
             type_code = reserve();
             if(type_code == 0){

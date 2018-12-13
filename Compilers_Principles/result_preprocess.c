@@ -1,1 +1,1 @@
-int main() { int a,b; a = 10143; b = a + 21; for(int i = 0; i < 1021; i++) b++; return 0; } 
+int main() { int a, _x_b; a = 10143; _x_b = a + 21; for(int i = 0; i < 1021; i++) _x_b++; return 0; } 
