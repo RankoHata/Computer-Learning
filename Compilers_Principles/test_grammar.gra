@@ -1,5 +1,7 @@
-E T F
+E T F A B
 + * ( ) i
-E->E+T|T
-T->T*F|F
+E->TA
+A->+TA|$
+T->FB
+B->*FB|$
 F->(E)|i

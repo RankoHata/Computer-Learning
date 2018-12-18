@@ -26,7 +26,7 @@ class Config(object):
     first_set_list = []
     follow_set_list = []
     nullable_set = set()  # Note: 存放的是*可以*推出空符号的非终结符，而非必然推出中介符号的终结符
-    old_first_set_list = []
+    first_s_set_list = []
 
 
 class ExperimentGrammarError(Exception):
@@ -69,7 +69,7 @@ def preprocess_grammar_text(grammar_text: str):
     start_char = grammar_text[0]
     relation_chars = grammar_text[1:3]  # 这里默认使用 -> , 并未考虑 ::=
     right_chars = grammar_text[3:]
-    if start_char <= 'A' or start_char >= 'Z':
+    if start_char < 'A' or start_char > 'Z':
         raise ExperimentGrammarError
     elif relation_chars != '->':
         raise ExperimentGrammarError
@@ -103,7 +103,7 @@ def eliminate_left_recursion():
 
 
 def eliminate_left_recursion_():
-    """消除左递归算法（自实现）"""
+    """消除左递归算法（暂未实现）"""
     pass
     
 
@@ -114,7 +114,7 @@ def get_nullable_set():
         for index in range(len(Config.nonterminal_chars)):
             for production in Config.production_data[index]:
                 if production == Config.symbol_empty:
-                    Config.nullable_set.add(production)
+                    Config.nullable_set.add(Config.nonterminal_chars[index])
                 else:
                     for char in production:  # 接受 A->B$  B->$
                         if char not in Config.nonterminal_chars and char != Config.symbol_empty:
@@ -174,18 +174,92 @@ def get_follow_set():
             break
 
 
-def syntax_analysis():
+def get_first_s_set():
+    """计算FIRST_S集"""
+    for item in Config.production_data:  # 开辟数据空间
+        Config.first_s_set_list.append([])
+        for production in item:
+            Config.first_s_set_list[-1].append(set())
+
+    for i, nonterminal in enumerate(Config.nonterminal_chars):
+        for j, production in enumerate(Config.production_data[i]):
+            __calculte_first_s(production, i, j)
+
+
+def __calculte_first_s(production, i, j):
+    for first_char in production:
+        if first_char in Config.terminal_chars:
+            Config.first_s_set_list[i][j] |= {first_char}
+            return
+        elif first_char in Config.nonterminal_chars:
+            n_index = Config.nonterminal_chars.index(first_char)
+            Config.first_s_set_list[i][j] |= Config.first_set_list[n_index]
+            if first_char not in Config.nullable_set:
+                return
+    Config.first_s_set_list[i][j] |= Config.follow_set_list[i]
+
+
+def parse(text: str):
+    print('分析符号串: {}'.format(text))
+    formatter = '步骤: {:<4}  分析栈: {:<5}  余留输入串: {:>5}  所用产生式: {:20}'
+    index = 1
+    rule = ''
+    stack = [Config.nonterminal_chars[0]]  # 模拟堆栈,文法开始符号入栈
+    remain_token = text
+    # print(formatter.format('步骤', '分析栈', '余留输入串', '所用产生式'))
+    while len(stack) != 0:
+        if stack[-1] in Config.nonterminal_chars:
+            i = Config.nonterminal_chars.index(stack[-1])
+            if remain_token[:1] == '':  # 对程序最后空符号部分进行特殊处理,以为程序内没有'#',所以这里要特判
+                if Config.symbol_empty in Config.production_data[i]:
+                    rule += stack[-1] + '->' + Config.symbol_empty
+                else:
+                    raise Exception
+            else:
+                for j, terminal_set in enumerate(Config.first_s_set_list[i]):
+                    if remain_token[:1] in terminal_set:  # 使用:1,可以避免remain_token为空时,下标越界的错误
+                        rule += stack[-1] + '->' + Config.production_data[i][j]
+                        break
+            stack_str = ''.join(stack)
+            print(formatter.format(index, stack_str, remain_token, rule))
+            stack.pop()
+            temp_production = [str_ for str_ in rule.split('->')[-1][::-1] if str_ != Config.symbol_empty]  # 分析时忽略空符号
+            stack.extend(temp_production)
+        elif stack[-1] in Config.terminal_chars:
+            if stack[-1] == remain_token[:1]:
+                stack_str = ''.join(stack)
+                print(formatter.format(index, stack_str, remain_token, rule))
+                stack.pop()
+                remain_token = remain_token[1:]
+            else:
+                raise Exception
+        rule = ''
+        index += 1
+    if len(remain_token) != 0:
+        raise Exception
+    print(formatter.format(index, '', '', 'success'))
+
+
+def syntax_analysis(text):
     set_production_data(filename='test_grammar.gra')
     eliminate_left_recursion()
     get_nullable_set()
     get_first_set()
     get_follow_set()
+    get_first_s_set()
+
+    # print(Config.nonterminal_chars)
+    # print(Config.production_data)
+    # print(Config.nullable_set)
+    # print(Config.first_set_list)
+    # print(Config.follow_set_list)
+    # print(Config.first_s_set_list)
+
+    formatter = '终结符: {:5} 产生式: {:20} FIRST: {:20} FOLLOW: {:20} FIRST_S: {:20}'
+    for item in zip(Config.nonterminal_chars, Config.production_data, Config.first_set_list, Config.follow_set_list, Config.first_s_set_list):
+        print(formatter.format(*[str(i) for i in item]))
+    parse(text)
 
 
 if __name__ == '__main__':
-    syntax_analysis()
-    print(Config.production_data)
-    print(Config.first_set_list)
-    print(Config.nullable_set)
-    print(Config.follow_set_list)
-    
+    syntax_analysis('i+i*i')
