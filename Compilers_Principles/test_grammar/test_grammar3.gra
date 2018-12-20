@@ -1,0 +1,5 @@
+S F G
+( ) i + b a
+S->(S+F)|a
+F->iF|G
+G->b

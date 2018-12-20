@@ -6,3 +6,7 @@
 *.out
 
 *.txt
+
+# python
+__pycache__
+*.pyc

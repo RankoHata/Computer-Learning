@@ -139,7 +139,18 @@ def set_production_data(filepath):
 
 
 def eliminate_indirect_left_recursion():
-    """消除间接左递归算法"""
+    """消除间接左递归算法
+    1. 将文法G的所有非终结符整理成某种顺序U1, U2, ..., Un
+    2. FOR i:= 1 TO n DO:
+        BEGIN
+            FOR j:= 1 TO i-1 DO
+            BEGIN
+            IF Ui ::= Uj_y
+                Ui ::= x1_y | x2_y | ... | xk_y (Uj ::= x1 | x2 | ... | xk 是Uj的所有规则)
+            END
+        END
+    3. 去除多于规则(并没有做) 
+    """
     n = len(Config.nonterminal_chars)
     production_data = deepcopy(Config.production_data)
     for i in range(n):
@@ -212,6 +223,7 @@ def eliminate_direct_left_recursion():
 def get_nullable_set():
     """计算NULLABLE集(可推导为空的符号的集合)"""
     while True:
+        flag = True
         old_nullable_set = deepcopy(Config.nullable_set)  # 单维可变数据用不用deepcopy无所谓
         for index in range(len(Config.nonterminal_chars)):
             for production in Config.production_data[index]:
@@ -220,9 +232,13 @@ def get_nullable_set():
                 else:
                     for char in production:  # 接受 A->B$  B->$
                         if char not in Config.nonterminal_chars and char != Config.symbol_empty:
+                            flag = False
                             break
                         if char not in old_nullable_set:
+                            flag = False
                             break
+                    if flag:
+                        Config.nullable_set.add(Config.nonterminal_chars[index])
         if old_nullable_set == Config.nullable_set:
             break
 
@@ -409,25 +425,31 @@ def syntax_analysis(text, filepath):
     output_vn_and_production()
 
     get_nullable_set()  # 计算NULLABLE集
+    print_('>>> NULLABLE集: {}'.format(str(Config.nullable_set)))
     get_first_set()     # 计算FIRST集
     get_follow_set()    # 计算FOLLOW集
     get_first_s_set()   # 计算FIRST_S集
     check_is_LL1()      # 检测是否是LL(1)文法
-    print_('>>> 计算NULLABLE集,FIRST集,FOLLOW集,FIRST_S集:')
+    print_('>>> 计算FIRST集,FOLLOW集,FIRST_S集:')
     output_all_info()
 
     status_code = parse(text)  # 分析字符串,获取状态码
     if status_code == Config.SUCCESS:
         print_('>>> 分析完成,字符串: {} 是该文法的句子'.format(text))
+        return True
     else:
         print_('>>> 分析完成,字符串: {} 不是该文法的句子\n>>> 错误代码: {}\n>>> 错误信息: {}'.format(text, status_code, Config.ERROR_MESSAGE[status_code]))
-    print_('\n\n')
+        return False
+
+
+def syntax_interface(grammar_filepath, text):
+    return syntax_analysis(text, grammar_filepath)
 
 
 if __name__ == '__main__':
     dirname = 'test_grammar'  # 存储文法文件和测试字符串文件的文件夹名
-    test_filename = 'test_token2'
-    grammar_filename = 'test_grammar2.gra'
+    test_filename = 'test_token'
+    grammar_filename = 'test_grammar1.gra'
     with open(os.path.join(dirname, test_filename), 'rt', encoding='utf-8') as f:  # 测试文件一行一个测试字符串
         for line in f.readlines():
             syntax_analysis(line.strip(), filepath=os.path.join(dirname, grammar_filename))  # 注意使用strip,否则\n会干扰程序执行
