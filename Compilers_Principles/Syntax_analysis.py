@@ -27,7 +27,7 @@
 """
 
 import os  # 路径相关操作
-from copy import deepcopy  # 深拷贝
+from copy import deepcopy  # 深拷贝,而不是只进行引用(内存地址)传递
 
 
 def print_(*args, **kwargs):
